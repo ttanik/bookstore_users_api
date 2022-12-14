@@ -2,7 +2,15 @@ module github.com/ttanik/bookstore_users-api
 
 go 1.19
 
-require github.com/gin-gonic/gin v1.8.1
+require (
+	github.com/gin-gonic/gin v1.8.1
+	github.com/go-sql-driver/mysql v1.7.0
+)
+
+require (
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -17,6 +25,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
+	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
