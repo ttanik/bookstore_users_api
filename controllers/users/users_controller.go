@@ -5,17 +5,19 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ttanik/bookstore_oauth-go/oauth"
+	"github.com/ttanik/bookstore_oauth-go/oauth/errors"
 	"github.com/ttanik/bookstore_users-api/domain/users"
 	"github.com/ttanik/bookstore_users-api/services"
 	"github.com/ttanik/bookstore_users-api/utils/date_utils"
-	"github.com/ttanik/bookstore_users-api/utils/errors"
+	"github.com/ttanik/bookstore_utils-go/rest_errors"
 )
 
 func Create(c *gin.Context) {
 	var user users.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
-		restErr := errors.NewBadRequestError("invalid json body")
+		restErr := rest_errors.NewBadRequestError("invalid json body")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -31,6 +33,10 @@ func SearchUser(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "not implemented")
 }
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
 	userID, userErr := getUserId(c.Param("user_id"))
 	if userErr != nil {
 		err := errors.NewBadRequestError("invalid user id")
@@ -42,7 +48,11 @@ func Get(c *gin.Context) {
 		c.JSON(saveErr.Status, saveErr)
 		return
 	}
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
+	if oauth.GetCallerId(c.Request) == user.Id {
+		c.JSON(http.StatusOK, user.Marshall(false))
+		return
+	}
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Delete(c *gin.Context) {
@@ -92,6 +102,21 @@ func Search(c *gin.Context) {
 	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
+func Login(c *gin.Context) {
+	var loginRequest users.LoginRequest
+	err := c.ShouldBindJSON(&loginRequest)
+	if err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	user, errLogin := services.UsersService.LoginUser(loginRequest)
+	if errLogin != nil {
+		c.JSON(errLogin.Status, errLogin)
+		return
+	}
+	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
+}
 func getUserId(idParam string) (int64, *errors.RestErr) {
 	userID, userErr := strconv.ParseInt(idParam, 10, 64)
 	if userErr != nil {

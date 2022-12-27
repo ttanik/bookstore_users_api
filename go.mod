@@ -5,9 +5,12 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-sql-driver/mysql v1.7.0
+	github.com/ttanik/bookstore_oauth-go v0.0.0-20221225120308-19c978b6a858
 )
 
 require (
+	github.com/mercadolibre/golang-restclient v0.0.0-20170701022150-51958130a0a0 // indirect
+	github.com/ttanik/bookstore_utils-go v0.0.0-20221227203740-2b7d997b7c84 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 )
